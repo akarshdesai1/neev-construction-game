@@ -293,7 +293,6 @@
   var ROUND_TRIP_S = (OUT_MS + BACK_MS) / 1000;
 
   // pick the friendliest-sounding available voice instead of the default flat/robotic one
-  var chosenVoice = null;
   function pickVoice(){
     if(!("speechSynthesis" in window)) return null;
     var voices = window.speechSynthesis.getVoices();
@@ -305,10 +304,6 @@
     if(!preferred) preferred = pool.find(function(v){ return v.localService === false; });
     return preferred || pool[0];
   }
-  if("speechSynthesis" in window){
-    chosenVoice = pickVoice();
-    window.speechSynthesis.onvoiceschanged = function(){ chosenVoice = pickVoice(); };
-  }
 
   var currentUtterance = null; // keep a live reference so Safari/Chrome don't garbage-collect it mid-speech
   function speak(text){
@@ -317,7 +312,10 @@
       window.speechSynthesis.cancel();
       window.speechSynthesis.resume(); // iOS Safari can leave the queue paused
       var u = new SpeechSynthesisUtterance(text);
-      if(chosenVoice) u.voice = chosenVoice;
+      // fetch the voice fresh on every call instead of reusing a cached object -
+      // iOS Safari can silently fail to speak (no sound, no error) if given a stale voice reference
+      var v = pickVoice();
+      if(v) u.voice = v;
       u.rate = 1.08; u.pitch = 1.45; u.volume = 1;
       currentUtterance = u;
       window.speechSynthesis.speak(u);
