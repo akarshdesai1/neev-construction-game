@@ -356,8 +356,11 @@
     }, OUT_MS + BACK_MS + 60);
   }
 
+  // "click" (not pointerdown/touchstart) is the event type mobile browsers recognize as a genuine
+  // user activation gesture for gated APIs like speechSynthesis - pointerdown fires the instant a
+  // finger touches down, before the browser considers it a completed user gesture.
   document.querySelectorAll(".lane").forEach(function(lane){
-    lane.addEventListener("pointerdown", function(e){
+    lane.addEventListener("click", function(e){
       e.preventDefault();
       activateLane(lane);
     });
@@ -368,14 +371,14 @@
   var playBtn = document.getElementById("playBtn");
   var homeBtn = document.getElementById("homeBtn");
 
-  playBtn.addEventListener("pointerdown", function(e){
+  playBtn.addEventListener("click", function(e){
     e.preventDefault();
     startScreen.hidden = true;
     game.hidden = false;
     speak("Yay, let's build!");
   });
 
-  homeBtn.addEventListener("pointerdown", function(e){
+  homeBtn.addEventListener("click", function(e){
     e.preventDefault();
     if("speechSynthesis" in window) window.speechSynthesis.cancel();
     game.hidden = true;
