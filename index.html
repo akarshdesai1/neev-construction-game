@@ -310,13 +310,16 @@
     window.speechSynthesis.onvoiceschanged = function(){ chosenVoice = pickVoice(); };
   }
 
+  var currentUtterance = null; // keep a live reference so Safari/Chrome don't garbage-collect it mid-speech
   function speak(text){
     if(!("speechSynthesis" in window)) return;
     try{
       window.speechSynthesis.cancel();
+      window.speechSynthesis.resume(); // iOS Safari can leave the queue paused
       var u = new SpeechSynthesisUtterance(text);
       if(chosenVoice) u.voice = chosenVoice;
       u.rate = 1.08; u.pitch = 1.45; u.volume = 1;
+      currentUtterance = u;
       window.speechSynthesis.speak(u);
     }catch(e){}
   }
